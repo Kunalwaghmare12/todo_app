@@ -1,65 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:to_do_app/Models/api_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:to_do_app/Bloc/todo_bloc.dart';
+import 'package:to_do_app/Models/todo_model.dart';
 
-import 'addTask_page.dart';
+
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key});
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Map<String, dynamic>> showtasks = [];
   @override
   void initState() {
     super.initState();
-    fetchTasks();
+    BlocProvider.of<TodoBloc>(context).add(TodoLoadedEvent());
   }
 
-  goToAddTaskPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddTaskPage(onTaskAdded: fetchTasks,),
-      ),
-    );
-  }
+  // void goToEditPage(BuildContext context, TodoModel todoModel){
+  //   Navigator.pushNamed(context,'AddTask')
+  // }
 
-  Future<void> fetchTasks() async {
-    try {
-      List<Map<String, dynamic>> tasks = await TaskService.fetchTasks();
-      setState(() {
-        showtasks = tasks;
-      });
-    } catch (e) {
-      throw Exception("unable to fetch");
-    }
-  }
+  DateTime dateTime =DateTime.now();
 
-  void editTask() {}
-  deleteTask(String id) async{
-    try{
-      await TaskService.deleteTask(id);
-      setState(() {
-        fetchTasks();
-      });
-
-    }catch(e){
-      throw Exception("unable to delete task");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    print("build");
     return Scaffold(
       appBar: AppBar(
-        leading: const Icon(Icons.task),
+          leading: const Icon(Icons.task),
 
-        backgroundColor: Colors.lightGreen,
-        title: const Text("To-Do App")
+          backgroundColor: Colors.lightGreen,
+          title: const Text("To-Do App")
       ),
       body: Stack(children: [
         Container(
@@ -78,8 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
         Positioned(
             top: 90,
             bottom: 0,
-            left: 0,
-            right: 0,
+            left: 10,
+            right:10,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
@@ -90,37 +64,64 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 color: Colors.white,
               ),
-              child:ListView.builder(
-                  itemCount: showtasks.length,
-                  itemBuilder: (context, index) {
-                    String id=showtasks[index]['_id'];
-                    return Card(
-                      margin: const EdgeInsets.all(5),
-                      elevation: 3,
-                      child: ListTile(
-                        leading: CircleAvatar(child: Text("${index + 1}")),
-                        title: Text("Title : ${showtasks[index]['title']}"),
-                        subtitle: Text(
-                            "Description : ${showtasks[index]['description']}"),
-                        trailing:
-                        Row(mainAxisSize: MainAxisSize.min, children: [
-                          IconButton(
-                            icon: const Icon(Icons.delete,color: Colors.red,),
-                            onPressed: ()=>deleteTask(id),
-                          ),
-                          const SizedBox(
-                              width: 1),
-                          IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: editTask)
-                        ]),
-                      ),
-                    );
-                  }),
+              child: BlocBuilder<TodoBloc, TodoState>(
+                builder: (context, state){
+                  if(state is TodoInitial){
+                    return const Center(child: CircularProgressIndicator(),);
+                  }
+                  else if(state is TodoLoadedState){
+                      return ListView.builder(
+                          itemCount: state.tasks.length,
+                          itemBuilder: (context, index) {
+                            TodoModel todo = state.tasks[index];
+                            return Card(
+                              margin: const EdgeInsets.all(5),
+                              elevation: 3,
+                              child: ListTile(
+                                leading: CircleAvatar(child: Text("${index + 1}")),
+                                title: Text("Title : ${todo.title}"),
+                                subtitle: Column(
+                                  children: [
+                                    Text(
+                                        "Description : ${todo.description}"),
+                                    // SizedBox(height: 4,),
+                                    Text("${DateTime.now()}"),
+                                  ],
+                                ),
+                                trailing:
+                                Row(mainAxisSize: MainAxisSize.min, children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete, color: Colors.red,),
+                                    onPressed: (){
+                                      BlocProvider.of<TodoBloc>(context).add(TodoDeleteEvent("${todo.sId}"));
+                                    },
+                                  ),
+                                  const SizedBox(
+                                      width: 1),
+                                  IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                       Navigator.pushNamed(context,'EditTask');
+                                      }),
+                                ]),
+                              ),
+                            );
+                          });
+                    }else if(state is TodoErrorState){
+                    return Center(child: Text(state.errorMessage),);
+                  }else{
+                    return Container();
+                  }
+                },
+              ),
             ))
       ]),
       floatingActionButton: FloatingActionButton(
-        onPressed: goToAddTaskPage,
+        // onPressed: goToAddTaskPage,
+        onPressed: () {
+          Navigator.pushNamed(context, "AddTask");
+        },
         backgroundColor: Colors.green,
         child: const Icon(Icons.add),
       ),
