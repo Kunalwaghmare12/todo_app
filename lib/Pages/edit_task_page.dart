@@ -7,113 +7,100 @@ class EditTaskPage extends StatefulWidget {
   final TodoModel oldTodo;
 
   const EditTaskPage({super.key, required this.oldTodo});
-
   @override
   State<EditTaskPage> createState() => EditTaskPageState();
 }
 
 class EditTaskPageState extends State<EditTaskPage> {
-  // EditTaskPageState(this.oldTask);
-
-  late TextEditingController titleController=TextEditingController();
-  late TextEditingController descController=TextEditingController();
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late TextEditingController _titleController=TextEditingController();
+  late TextEditingController _descController=TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    print('oldTodo: ${widget.oldTodo}');
-    print('oldTodo title: ${widget.oldTodo.title}');
-    print('oldTodo description: ${widget.oldTodo.description}');
-    titleController.text =widget.oldTodo.title.toString();
-    descController.text = widget.oldTodo.description.toString();
+    _titleController = TextEditingController(text:widget.oldTodo.title);
+    _descController = TextEditingController(text: widget.oldTodo.description);
   }
 
-  void editedTaskSubmit(TodoModel oldTodo) {
+  void editedTaskSubmit() {
     final TodoBloc todoBloc = BlocProvider.of<TodoBloc>(context);
-    TodoModel editedTask = TodoModel(
-      sId: widget.oldTodo.sId,
-      title: titleController.text,
-      description: descController.text,
+    TodoModel updatedTask = TodoModel(
+      title: _titleController.text,
+      description: _descController.text,
+      isCompleted : false
     );
-    todoBloc.add(TodoEditEvent(widget.oldTodo.sId.toString(), editedTask));
+    todoBloc.add(TodoEditEvent(widget.oldTodo.sId.toString(), updatedTask));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("Changes Saved Successfully"),
+      duration: Duration(seconds: 1),
+    ));
+    _titleController.clear();
+    _descController.clear();
+
+
+    // BlocProvider.of<TodoBloc>(context).add(TodoEditEvent(widget.oldTodo.sId.toString(), editedTask));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TodoBloc, TodoState>(
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.lightGreen,
-            title: const Text("Edit Task"),
-          ),
-          body: BlocBuilder<TodoBloc, TodoState>(
-            builder: (context, state) {
-              return Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Card(
-                      child: TextFormField(
-                        controller: titleController,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please Enter Title";
-                          } else {}
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'Task Name',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Card(
-                      child: TextFormField(
-                        minLines: 5,
-                        maxLines: 8,
-                        controller: descController,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please Enter description";
-                          }
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'description',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ButtonStyle(
-                          minimumSize:
-                          MaterialStateProperty.all<Size>(const Size(200, 70))),
-                      child: const Text(
-                        "Save Changes",
-                        style: TextStyle(fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.lightGreen,
+        title: const Text("Edit Task"),
+      ),
+      body: Form(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Card(
+              child: TextFormField(
+                controller: _titleController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return "Please Enter Title";
+                  } else {
+                    return null;
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Task Name',
+                  border: OutlineInputBorder(),
                 ),
-              );
-            },
-          ),
-        );
-      },
+              ),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              child: TextFormField(
+                minLines: 5,
+                maxLines: 8,
+                controller: _descController,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return "Please Enter Description";
+                  } else {
+                    return null;
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: editedTaskSubmit,
+              style: ButtonStyle(
+                minimumSize: WidgetStateProperty.all<Size>(const Size(200, 70)),
+              ),
+              child: const Text(
+                "Save Changes",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

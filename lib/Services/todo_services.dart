@@ -43,18 +43,20 @@ class TodoService {
     }
   }
 
-  Future<TodoModel> editTask(TodoModel oldTask) async {
-    final editUrlWithId = '$editUrl${oldTask.sId}';
+  Future<TodoModel> editTask(String id,TodoModel updatedTask) async {
+    final editUrlWithId = '$editUrl$id';
+    print(editUrlWithId);
     final response = await http.put(
       Uri.parse(editUrlWithId),
-      body: jsonEncode(oldTask.toJson()),
+      body: jsonEncode(updatedTask.toJson()),
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json'
       },
     );
-
+    print("response of Edit task : ${response.statusCode}");
     if (response.statusCode == 200) {
+      print(response.body);
       return TodoModel.fromJson(jsonDecode(response.body));
     } else {
       throw Exception("Failed to edit task");

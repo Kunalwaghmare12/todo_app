@@ -7,6 +7,7 @@ final class TodoInitial extends TodoState {}
 class TodoAddedState extends TodoState{
 
 }
+class TodoEditSucessState extends TodoState{}
 
 class TodoErrorState extends TodoState{
   final String errorMessage;

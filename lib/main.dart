@@ -33,7 +33,6 @@ class MyApp extends StatelessWidget {
         routes: {
           '/' : (context) => const MyHomePage(),
           'AddTask' : (context) => const AddTaskPage(),
-          'EditTask' : (context) => EditTaskPage(oldTodo:TodoModel()),
         },
       ),
     );

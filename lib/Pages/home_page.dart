@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:to_do_app/Bloc/todo_bloc.dart';
 import 'package:to_do_app/Models/todo_model.dart';
+import 'package:to_do_app/Pages/edit_task_page.dart';
 
 
 
@@ -18,12 +19,12 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     BlocProvider.of<TodoBloc>(context).add(TodoLoadedEvent());
   }
+  // TodoModel todoModel =TodoModel();
 
-  // void goToEditPage(BuildContext context, TodoModel todoModel){
-  //   Navigator.pushNamed(context,'AddTask')
+  // goToEditPage(TodoModel todo){
+  //   Navigator.pushNamed(context,'EditTask',arguments:TodoModel() );
   // }
-
-  DateTime dateTime =DateTime.now();
+  // DateTime dateTime =DateTime.now();
 
 
   @override
@@ -80,14 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: ListTile(
                                 leading: CircleAvatar(child: Text("${index + 1}")),
                                 title: Text("Title : ${todo.title}"),
-                                subtitle: Column(
-                                  children: [
-                                    Text(
+                                subtitle: Text(
                                         "Description : ${todo.description}"),
-                                    // SizedBox(height: 4,),
-                                    Text("${DateTime.now()}"),
-                                  ],
-                                ),
                                 trailing:
                                 Row(mainAxisSize: MainAxisSize.min, children: [
                                   IconButton(
@@ -101,9 +96,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                       width: 1),
                                   IconButton(
                                       icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                       Navigator.pushNamed(context,'EditTask');
-                                      }),
+                                      onPressed:(){
+                                        final route = MaterialPageRoute(builder: (context)=>EditTaskPage(oldTodo: todo));
+                                        Navigator.push(context,route);
+                                      }) ,
                                 ]),
                               ),
                             );

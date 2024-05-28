@@ -11,6 +11,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final TodoRepo todoRepo;
   TodoBloc(this.todoRepo) : super(TodoInitial()){
 
+
+
     on<AddTodoEvent>((event,emit) async{
       try{
         await todoRepo.addTodo(event.todoModel);
@@ -46,11 +48,12 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
 
     on<TodoEditEvent>((event,emit)async {
       try{
-          await todoRepo.editTodo(event.updatedModel);
-          final tasks=await todoRepo.getTodo();
+          await todoRepo.editTodo(event.id,event.updatedModel);
+          List<TodoModel> tasks =
+          await todoRepo.getTodo();
           emit(TodoLoadedState(tasks));
       }catch(e){
-        throw Exception("Error while deleting");
+        throw Exception("Error while Editing");
       }
     });
 

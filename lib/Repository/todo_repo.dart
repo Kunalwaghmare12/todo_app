@@ -19,7 +19,9 @@ class TodoRepo{
   await todoService.deleteTask(id);
   }
 
-  Future<void> editTodo(TodoModel updatedTask) async{
-    await todoService.editTask(updatedTask);
+  Future<void> editTodo(String id,TodoModel updatedTask) async{
+    await todoService.editTask(id,updatedTask);
+
+
   }
 }
